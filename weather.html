@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>forecast app</title>
+    <link rel="stylesheet" href="styleww.css">
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter city name" spellcheck="false">
+            <button><img src="images/search.png"></img></button>
+        </div>
+            <div class="weather">
+                <img src="images/rain.png" class="weather-icon">
+                <h1 class="temp">27°C</h1>
+                <h2 class="city">New Delhi</h2>
+                <div class="details">
+                    <div class="col">
+                        <img src="images/humidity.png">
+                        <div>
+                            <p class="humidity">47%</p>
+                            <p>Humidity</p>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <img src="images/wind.png">
+                        <div>
+                            <p class="wind">3 km/h</p>
+                            <p>Wind speed</p>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+    </div>
+            <div id="weatherContainer">
+                <div class="icons">
+                    <p class="weather1" id="day1"></p>
+                    <div class="images"><img src="images/loading.png" class="imgClass" id="img1">
+                    <p class="minValues" id="day1Min">Loading...</p>
+                    <p class="maxValues" id="day1Max">Loading...</p>
+                    </div>
+                </div>
+                <div class="icons">
+                    <p class="weather1" id="day2"></p>
+                    <div class="images"><img src="images/loading.png" class="imgClass" id="img1">
+                    <p class="minValues" id="day2Min">Loading...</p>
+                    <p class="maxValues" id="day2Max">Loading...</p>
+                    </div>
+                </div>
+                <div class="icons">
+                    <p class="weather1" id="day3"></p>
+                    <div class="images"><img src="images/loading.png" class="imgClass" id="img1">
+                    <p class="minValues" id="day3Min">Loading...</p>
+                    <p class="maxValues" id="day3Max">Loading...</p>
+                    </div>
+                </div>
+                <div class="icons">
+                    <p class="weather1" id="day4"></p>
+                    <div class="images"><img src="images/loading.png" class="imgClass" id="img1">
+                    <p class="minValues" id="day4Min">Loading...</p>
+                    <p class="maxValues" id="day4Max">Loading...</p>
+                    </div>
+                </div>
+                <div class="icons">
+                    <p class="weather1" id="day5"></p>
+                    <div class="images"><img src="images/loading.png" class="imgClass" id="img1">
+                    <p class="minValues" id="day5Min">Loading...</p>
+                    <p class="maxValues" id="day5Max">Loading...</p>
+                    </div>
+                </div>
+            </div>
+           
+
+    <script>
+
+        const apiKey="88fbf34f7ab8c8ac94a370157f62dc6e";
+        const apiUrl="https://api.openweathermap.org/data/2.5/weather?&appid=88fbf34f7ab8c8ac94a370157f62dc6e&units=metric&q=";
+
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search button");
+        const weatherIcon = document.querySelector(".weather-icon");
+        const weatherContainer = document.querySelector(".weatherContainer");
+
+        async function checkWeather(city){
+            const response = await fetch(apiUrl + city + '&appid=${apiKey}');
+            var data= await response.json();
+
+            // console.log(data);
+
+            document.querySelector(".city").innerHTML = data.name;
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) +"°C";
+            document.querySelector(".humidity").innerHTML = data.main.humidity +"%";
+            document.querySelector(".wind").innerHTML = Math.round(data.wind.speed) +"km/h";
+
+            if(data.weather[0].main == "Clouds"){
+                weatherIcon.src = "images/clouds.png";
+            }
+            else if(data.weather[0].main == "Clear"){
+                weatherIcon.src = "images/clear.png";
+            }
+            else if(data.weather[0].main == "Rain"){
+                weatherIcon.src = "images/rain.png";
+            }
+            else if(data.weather[0].main == "Drizzle"){
+                weatherIcon.src = "images/drizzle.png";
+            }
+            else if(data.weather[0].main == "Snow"){
+                weatherIcon.src = "images/snow.png";
+            }
+            else if(data.weather[0].main == "Mist"){
+                weatherIcon.src = "images/mist.png";
+            }
+        
+        
+             document.querySelector(".weather").style.display= "block";
+    }
+       
+    // Function to fetch weather forecast
+    async function getWeatherForecast(city) {
+            const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?&appid=88fbf34f7ab8c8ac94a370157f62dc6e&units=metric&q=${city}`;
+            const response = await fetch(forecastUrl);
+            const data = await response.json();
+
+            // Assuming the data structure is similar to: data.list for a 5-day forecast
+
+            const forecastList = data.list;
+
+    // Get the date of the current day
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+    let dayCounter = 0; // Counter to keep track of days
+
+    for (let i = 0; i < forecastList.length; i++) {
+        const date = new Date(forecastList[i].dt * 1000);
+        date.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+
+        if (date.getTime() > today.getTime()) {
+            // If the date is different from the current day, consider it as a new day
+            if (date.getTime() !== today.getTime()) {
+                dayCounter++;
+
+                // Display weather details for the next five days
+                if(dayCounter<=5) {
+                    const day = date.toLocaleString('en-us', { weekday: 'long' });
+                    const icon = forecastList[i].weather[0].icon;
+                    const minTemp = Math.round(forecastList[i].main.temp_min);
+                    const maxTemp = Math.round(forecastList[i].main.temp_max);
+
+                    document.getElementById(`day${dayCounter}`).textContent = day;
+                    document.getElementById(`img${dayCounter}`).src = `https://openweathermap.org/img/w/${icon}.png`;
+                    document.getElementById(`day${dayCounter}Min`).textContent = `Min:- ${minTemp}°C`;
+                    document.getElementById(`day${dayCounter}Max`).textContent = `Max:- ${maxTemp}°C`;
+
+                }
+                
+            }
+
+            today.setTime(date.getTime()); // Update the current day
+            
+        }
+    }
+
+    
+}
+
+        searchBtn.addEventListener("click", async() => {
+            checkWeather(searchBox.value);
+            getWeatherForecast(searchBox.value); // Call this function when the weather is checked
+        })
+
+ 
+    </script>
+
+</body>
+</html>
